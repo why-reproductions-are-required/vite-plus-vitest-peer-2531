@@ -15,6 +15,7 @@ This repository investigates [voidzero-dev/vite-plus#2531](https://github.com/vo
 | `reported` | Only `vite-plus@^0.2.9` | Install succeeds |
 | `conflict` | `vite-plus@^0.2.9` and `@vitest/browser-playwright@4.1.11` | Install fails with `ERESOLVE` |
 | `aligned` | `vite-plus@^0.2.9` and `@vitest/browser-playwright@4.1.10` | Install succeeds |
+| `upstream-fix` | Vite+ PR 2500 preview and `@vitest/browser-playwright@4.1.11` | Install succeeds |
 
 Run each case from a clean checkout:
 
@@ -22,6 +23,7 @@ Run each case from a clean checkout:
 cd reported && npm install
 cd ../conflict && npm install
 cd ../aligned && npm install
+cd ../upstream-fix && npm install
 ```
 
 The original steps do not reproduce the reported failure. npm does not install optional peer dependencies when only `vite-plus` is present.
@@ -33,6 +35,6 @@ The issue's error output also reports an existing `vite-plus@0.2.8`, even though
 ## Fix options
 
 - Consumers on `vite-plus@0.2.9` can pin the browser provider to `4.1.10`.
-- Vite+ can publish an atomic update that moves `vitest` and all `@vitest/*` packages to `4.1.11`. The Vite+ `main` branch already contains that aligned update for the pending `0.3.0` release.
+- Vite+ can publish an atomic update that moves `vitest` and all `@vitest/*` packages to `4.1.11`. [Vite+ PR 2500](https://github.com/voidzero-dev/vite-plus/pull/2500) already merged that aligned update for the pending `0.3.0` release. The `upstream-fix` case verifies its registry-bridge preview.
 - Widening only the Vite+ optional peer range is unsafe because Vitest browser providers use exact `vitest` peer versions.
 - `--force` and `--legacy-peer-deps` suppress the resolver check but do not make the two Vitest versions compatible.
