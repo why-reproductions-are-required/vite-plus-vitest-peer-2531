@@ -1,12 +1,37 @@
 # Vite+ issue 2531 dependency-resolution investigation
 
-This repository investigates [voidzero-dev/vite-plus#2531](https://github.com/voidzero-dev/vite-plus/issues/2531) with three minimal npm projects.
+This repository investigates [voidzero-dev/vite-plus#2531](https://github.com/voidzero-dev/vite-plus/issues/2531) with four minimal npm projects.
 
 ## Environment
 
 - Node.js `26.5.0`
 - npm `12.0.2`
 - `vite-plus@^0.2.9` (resolves to `0.2.9`)
+
+Each project declares the exact Node and npm versions in `engines` and `packageManager`. The `Dockerfile` installs and verifies those versions before it runs `npm install`.
+
+## Exact container reproduction
+
+Use Docker to avoid relying on locally selected Node or npm versions:
+
+```sh
+docker build --target reported .
+```
+
+This build succeeds. The exact environment from the issue does not reproduce `ERESOLVE` when `vite-plus@^0.2.9` is the only relevant dependency.
+
+The smallest confirmed conflict is:
+
+```sh
+docker build --target conflict .
+```
+
+This build fails at `npm install` with `ERESOLVE`, as expected. The two fixed cases succeed:
+
+```sh
+docker build --target aligned .
+docker build --target upstream-fix .
+```
 
 ## Results
 
@@ -17,9 +42,11 @@ This repository investigates [voidzero-dev/vite-plus#2531](https://github.com/vo
 | `aligned` | `vite-plus@^0.2.9` and `@vitest/browser-playwright@4.1.10` | Install succeeds |
 | `upstream-fix` | Vite+ PR 2500 preview and `@vitest/browser-playwright@4.1.11` | Install succeeds |
 
-Run each case from a clean checkout:
+You can also run each case directly if your active tools report Node `v26.5.0` and npm `12.0.2`:
 
 ```sh
+node --version
+npm --version
 cd reported && npm install
 cd ../conflict && npm install
 cd ../aligned && npm install
